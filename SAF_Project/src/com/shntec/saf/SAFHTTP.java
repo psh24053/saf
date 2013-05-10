@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InterruptedIOException;
 import java.io.UnsupportedEncodingException;
 
+import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.ParseException;
 import org.apache.http.client.ClientProtocolException;
@@ -42,12 +43,12 @@ public class SAFHTTP {
 		
 	}
 	/**
-	 * 以GET的方式请求URL，并返回字符串数据
+	 * 以GET的方式请求URL，并返回HttpResponse
 	 * @param url
 	 * @return
 	 * @throws SAFException 
 	 */
-	public String GET(String url) throws SAFException{
+	public HttpResponse GET(String url) throws SAFException{
 		if(httpClient == null){
 			initHttpClient();
 		}
@@ -58,10 +59,9 @@ public class SAFHTTP {
 		// 声明httpget对象
 		HttpGet get = new HttpGet(url);
 		HttpResponse response = null;
-		long startTime = 0;
+		
 		// 执行get请求
 		try {
-			startTime = System.currentTimeMillis();
 			response = httpClient.execute(get);
 		} catch (ClientProtocolException e) {
 			throw new SAFException(0, "客户端协议错误", e);
@@ -76,7 +76,21 @@ public class SAFHTTP {
 		if(response == null){
 			throw new SAFException(0, "response 为空");
 		}
+		return response;
+	}
+	
+	/**
+	 * 以GET的方式请求URL，并返回字符串数据
+	 * @param url
+	 * @return
+	 * @throws SAFException 
+	 */
+	public String GETtoString(String url) throws SAFException{
+		
 		// 最终返回值
+		long startTime = System.currentTimeMillis();
+		HttpResponse response = GET(url);
+		
 		String responseString = null;
 		
 		switch (response.getStatusLine().getStatusCode()) {
@@ -100,14 +114,48 @@ public class SAFHTTP {
 		lastTime = System.currentTimeMillis() - startTime;
 		return responseString;
 	}
+	
+	public HttpResponse POST(String url, HttpEntity entity) throws SAFException{
+		if(httpClient == null){
+			initHttpClient();
+		}
+		// 传入的url不能为null
+		if(url == null){
+			throw new SAFException(0, "传入的URL不能为null");
+		}
+		// 声明httppost对象
+		HttpPost post = new HttpPost(url);
+		post.setEntity(entity);
+		
+		
+		HttpResponse response = null;
+		// 执行get请求
+		try {
+			response = httpClient.execute(post);
+		} catch (ClientProtocolException e) {
+			throw new SAFException(0, "客户端协议错误", e);
+		} catch (ConnectTimeoutException e){
+			throw new SAFException(0, "连接超时", e);
+		} catch (InterruptedIOException e){
+			throw new SAFException(0, "IO被中断", e);
+		} catch (IOException e) {
+			throw new SAFException(0, "IO错误，可能是服务器的问题", e);
+		}
+		// 判断返回的httpresponse是否为null
+		if(response == null){
+			throw new SAFException(0, "response 为空");
+		}
+		
+		return response;
+	}
 	/**
-	 * 以POST的方式请求URL，并返回字符串数据
+	 * 以POST的方式请求URL，并返回HttpResponse
 	 * @param url
-	 * @param request
 	 * @return
 	 * @throws SAFException 
 	 */
-	public String POST(String url, JSONObject request) throws SAFException{
+	public HttpResponse POST(String url, JSONObject request) throws SAFException{
+		
 		if(httpClient == null){
 			initHttpClient();
 		}
@@ -127,10 +175,8 @@ public class SAFHTTP {
 		
 		
 		HttpResponse response = null;
-		long startTime = 0;
 		// 执行get请求
 		try {
-			startTime = System.currentTimeMillis();
 			response = httpClient.execute(post);
 		} catch (ClientProtocolException e) {
 			throw new SAFException(0, "客户端协议错误", e);
@@ -145,7 +191,22 @@ public class SAFHTTP {
 		if(response == null){
 			throw new SAFException(0, "response 为空");
 		}
+		
+		return response;
+	}
+	
+	/**
+	 * 以POST的方式请求URL，并返回字符串数据
+	 * @param url
+	 * @param request
+	 * @return
+	 * @throws SAFException 
+	 */
+	public String POSTtoString(String url, JSONObject request) throws SAFException{
+		
 		// 最终返回值
+		long startTime = System.currentTimeMillis();
+		HttpResponse response = POST(url, request);
 		String responseString = null;
 		
 		switch (response.getStatusLine().getStatusCode()) {
@@ -176,7 +237,7 @@ public class SAFHTTP {
 	 * @throws SAFException 
 	 */
 	public JSONObject GETtoJSON(String url) throws SAFException{
-		String res = GET(url);
+		String res = GETtoString(url);
 		// 如果GET的返回值为null则返回空
 		if(res == null){
 			return null;
@@ -196,7 +257,7 @@ public class SAFHTTP {
 	 * @throws SAFException 
 	 */
 	public JSONObject POSTtoJSON(String url, JSONObject request) throws SAFException{
-		String res = POST(url, request);
+		String res = POSTtoString(url, request);
 		// 如果POST的返回值为null则返回空
 		if(res == null){
 			return null;
