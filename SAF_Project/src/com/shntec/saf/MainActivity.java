@@ -5,14 +5,18 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.shntec.saf.SAFTransportProgressInputStream.onTransportProgressListener;
+import com.shntec.saf.activity.SAFBitmapBrowser;
 
 import android.os.Bundle;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
 import android.view.Menu;
+import android.view.View;
+import android.view.View.OnClickListener;
 import android.widget.ImageView;
 
 public class MainActivity extends Activity {
@@ -21,7 +25,7 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		
+		SAFCache cache = SAFCache.getInstance(this);
 		
 		
 		
@@ -40,6 +44,16 @@ public class MainActivity extends Activity {
 						public void run() {
 							ImageView image = (ImageView) findViewById(R.id.image);
 							image.setImageBitmap(b);
+							image.setOnClickListener(new OnClickListener() {
+								
+								@Override
+								public void onClick(View arg0) {
+									// TODO Auto-generated method stub
+									Intent intent = new Intent(MainActivity.this, SAFBitmapBrowser.class);
+									startActivity(intent);
+									
+								}
+							});
 							Log.i("SAF", b.getWidth()+" ,"+b.getHeight());
 						}
 					});

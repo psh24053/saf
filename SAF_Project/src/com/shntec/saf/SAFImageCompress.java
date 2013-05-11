@@ -2,11 +2,16 @@ package com.shntec.saf;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 
 import org.apache.http.HttpEntity;
 
+import com.shntec.saf.SAFTransportProgressInputStream.onTransportProgressListener;
+
+import android.app.Application;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.BitmapFactory.Options;
@@ -20,8 +25,48 @@ import android.util.Log;
  */
 public class SAFImageCompress {
 
+	private onTransportProgressListener listener;
+	
+	public SAFImageCompress(){}
+	public SAFImageCompress(onTransportProgressListener listener){
+		this.listener = listener;
+		
+	}
+	
+	/**
+	 * 根据url获取一个bitmap,适应于全屏模式
+	 * @param url
+	 * @return
+	 * @throws SAFException 
+	 */
+	public Bitmap HttpFullScreenCompress(String url) throws SAFException{
+		BitmapFactory.Options options = new Options();
+		options.inPreferredConfig = Bitmap.Config.RGB_565;
+		
+		SAFHTTPTransport httptransport = new SAFHTTPTransport();
+		SAFCache cache = SAFCache.getInstance();
+		
+		String md5 = SAFUtils.getMD5Str(url);
+		
+		// 首先将图片存入本地缓存
+		try {
+			cache.SaveFilesCache(md5, httptransport.download(url, listener));
+		} catch (IllegalStateException e) {
+			throw new SAFException(0, e.getMessage(), e);
+		} catch (IOException e) {
+			throw new SAFException(0, e.getMessage(), e);
+		}
+		// 生成bitmap
+		try {
+			return BitmapFactory.decodeStream(cache.readFilesCache(md5), null, options);
+		} catch (FileNotFoundException e) {
+			throw new SAFException(0, e.getMessage(), e);
+		}
+		
+	}
 	/**
 	 * 根据url获取一个bitmap，根据传入的大小来进行缩放
+	 * 这个方法会借助缓存的帮助，首先将图片保存至缓存，然后再进行压缩
 	 * @param url
 	 * @param width
 	 * @param height
@@ -34,25 +79,29 @@ public class SAFImageCompress {
 		options.inPreferredConfig = Bitmap.Config.RGB_565;
 		options.inJustDecodeBounds = true;
 
-		SAFHTTP http = new SAFHTTP();
-//		byte[] bytes = null;
-//		
-//		try {
-//			bytes = SAFUtils.readInputStream(entity.getContent());
-//		} catch (IllegalStateException e) {
-//			throw new SAFException(0, e.getMessage(), e);
-//		} catch (IOException e) {
-//			throw new SAFException(0, e.getMessage(), e);
-//		}
+		// 使用safhttp从网络上拉取图片
+		SAFHTTPTransport httptransport = new SAFHTTPTransport();
+		SAFCache cache = SAFCache.getInstance();
+		
+		String md5 = SAFUtils.getMD5Str(url);
+		
+		// 首先将图片存入本地缓存
+		try {
+			cache.SaveFilesCache(md5, httptransport.download(url, listener));
+		} catch (IllegalStateException e) {
+			throw new SAFException(0, e.getMessage(), e);
+		} catch (IOException e) {
+			throw new SAFException(0, e.getMessage(), e);
+		}
+		
+		
 		Bitmap bitmap = null;
 		try {
-			bitmap = BitmapFactory.decodeStream(http.GET(url).getEntity().getContent(), null, options);
-		} catch (IllegalStateException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
-		} catch (IOException e1) {
-			// TODO Auto-generated catch block
-			e1.printStackTrace();
+			bitmap = BitmapFactory.decodeStream(cache.readFilesCache(md5), null, options);
+		} catch (IllegalStateException e) {
+			throw new SAFException(0, e.getMessage(), e);
+		} catch (IOException e) {
+			throw new SAFException(0, e.getMessage(), e);
 		}
 		
 		int bwidth = options.outWidth;
@@ -74,13 +123,11 @@ public class SAFImageCompress {
 		options.inSampleSize = be;
 		options.inJustDecodeBounds = false;
 		try {
-			bitmap = BitmapFactory.decodeStream(http.GET(url).getEntity().getContent(), null, options);
+			bitmap = BitmapFactory.decodeStream(cache.readFilesCache(md5), null, options);
 		} catch (IllegalStateException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new SAFException(0, e.getMessage(), e);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			throw new SAFException(0, e.getMessage(), e);
 		}
 		Bitmap newbitmap = ThumbnailUtils.extractThumbnail(bitmap, width, height);
 		bitmap.recycle();
@@ -117,13 +164,10 @@ public class SAFImageCompress {
 		// 设置bitmap的色彩模式为RGB565，每个像素占两个字节
 		options.inPreferredConfig = Bitmap.Config.RGB_565;
 		
-		int imgWidth = options.outWidth;
-		int imgHeight = options.outHeight;
-		
 		// 如果图片的大小大于100k则执行压缩
 		if(totalSize / 1024 > 100){
 			int m = (int) (totalSize / 1024 / 100);
-			if(m > 2){
+			if(m > 3){
 				m /= 2;
 			}
 			if(m <= 0){
