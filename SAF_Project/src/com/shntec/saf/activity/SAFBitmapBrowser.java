@@ -60,6 +60,9 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
     static final int ZOOM = 2; 
     int mode = NONE; 
     private long beginTime,endTime; 
+    private float defaultScale;
+    
+    
      @Override 
      public void onCreate(Bundle savedInstanceState)    { 
       super.onCreate(savedInstanceState); 
@@ -104,12 +107,13 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
       } 
       else 
           scale = scaleWid; 
-       
+      
+      defaultScale = scale;
  //     matrix=new Matrix(); 
       bmp.setImageBitmap(mybitmap); 
        
       matrix.postScale(scale,scale); 
-      
+      matrix.postTranslate(width / 2 - scale * widOrg / 2, height / 2 - scale * heightOrg / 2);
       bmp.setImageMatrix(matrix); 
        
       bmp.setOnTouchListener(this); 
@@ -158,32 +162,43 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
 //                System.out.println("move"); 
                 if(mode == DRAG) 
                 { 
-                	float[] fs = new float[9];
-                	bmp.getImageMatrix().getValues(fs);
+					float[] values = new float[9];
+					bmp.getImageMatrix().getValues(values);
+//					for(int i = 0 ; i < values.length ; i ++){
+//						System.out.println(values[i]);
+//					}
                 	
-                	float left = fs[2];
-                	float top = fs[5];
-                	float scale = fs[8];
+					// matrix矩阵中的宽度和高度缩放值
+					float widthScale = values[0];
+					float heightScale = values[4];
+					
+					// matrix矩阵中的x,y偏移量
+					float matrixX = values[2];
+					float matrixY = values[5];
                 	
+					System.out.println("widthScale -> "+widthScale+" ,heightScale -> "+heightScale);
+					System.out.println("matrixX -> "+matrixX+" ,matrixY -> "+matrixY);
+					
                 	float dx = event.getX()-start.x;
                 	float dy = event.getY()-start.y;
                 	
-//                	
-//                	System.out.println(bmp.getImageMatrix());
-//                	
-//                	if(left > 0){
-//                		dx = 0;
-//                	}else if(left < -scale * bmp.getWidth()){
-//                		dx = -scale * bmp.getWidth();
-//                	}
-//                	
-//                	if(top > 0){
-//                		dy = 0;
-//                	}else if(top < -scale * bmp.getHeight()){
-//                		dy = -scale * bmp.getHeight();
-//                	}
+                	if(widthScale > 0){
+                		
+                	}
                 	
-                	matrix.postTranslate(dx, dy); 
+                	
+                	if(matrixX + dx < 0){
+                		dx = 0;
+                	}
+                	
+                	if(matrixY + dy < 0){
+                		dy = 0;
+                	}
+                	
+                	System.out.println("dx -> "+dx+" ,dy -> "+dy);
+                	
+                	matrix.postTranslate(dx, dy);
+                	
                 	start.set(event.getX(), event.getY());
                 	
                 	

@@ -1,11 +1,18 @@
-package com.shntec.saf;
+package com.shntec.saf.activity;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import com.shntec.saf.R;
+import com.shntec.saf.SAFCache;
+import com.shntec.saf.SAFException;
+import com.shntec.saf.SAFHTTPTransport;
+import com.shntec.saf.SAFImageCompress;
+import com.shntec.saf.R.id;
+import com.shntec.saf.R.layout;
+import com.shntec.saf.R.menu;
 import com.shntec.saf.SAFTransportProgressInputStream.onTransportProgressListener;
-import com.shntec.saf.activity.SAFBitmapBrowser;
 
 import android.os.Bundle;
 import android.annotation.SuppressLint;
