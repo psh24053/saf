@@ -72,11 +72,6 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
               WindowManager.LayoutParams.FLAG_FULLSCREEN);  
       setContentView(R.layout.layout_bitmapbrowser); 
      
-      big = (Button)this.findViewById(R.id.enlarge); 
-      small = (Button)this.findViewById(R.id.narrow); 
-     
-      big.setOnClickListener(this); 
-      small.setOnClickListener(this); 
       
       //获取手机屏幕的宽和高 
       DisplayMetrics dm = new DisplayMetrics();    
@@ -173,20 +168,20 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
                 	float dx = event.getX()-start.x;
                 	float dy = event.getY()-start.y;
                 	
-                	
-                	System.out.println(bmp.getImageMatrix());
-                	
-                	if(left > 0){
-                		dx = 0;
-                	}else if(left < -scale * bmp.getWidth()){
-                		dx = -scale * bmp.getWidth();
-                	}
-                	
-                	if(top > 0){
-                		dy = 0;
-                	}else if(top < -scale * bmp.getHeight()){
-                		dy = -scale * bmp.getHeight();
-                	}
+//                	
+//                	System.out.println(bmp.getImageMatrix());
+//                	
+//                	if(left > 0){
+//                		dx = 0;
+//                	}else if(left < -scale * bmp.getWidth()){
+//                		dx = -scale * bmp.getWidth();
+//                	}
+//                	
+//                	if(top > 0){
+//                		dy = 0;
+//                	}else if(top < -scale * bmp.getHeight()){
+//                		dy = -scale * bmp.getHeight();
+//                	}
                 	
                 	matrix.postTranslate(dx, dy); 
                 	start.set(event.getX(), event.getY());
