@@ -61,6 +61,10 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
     int mode = NONE; 
     private long beginTime,endTime; 
     private float defaultScale;
+    private int displayWidth;
+    private int displayHeight;
+    private int mainWidth;
+    private int mainHeight;
     
     
      @Override 
@@ -82,8 +86,11 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
      
       int width = dm.widthPixels; 
       int height = dm.heightPixels; 
-       
-       
+      
+      mainWidth = width;
+      mainHeight = height;
+      
+      
       // 获取图片本身的宽 和高 
       Bitmap mybitmap=BitmapFactory.decodeResource(getResources(), R.drawable.abc); 
 //      System.out.println("old==="+mybitmap.getWidth()); 
@@ -91,6 +98,9 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
       int widOrg=mybitmap.getWidth(); 
       int heightOrg=mybitmap.getHeight(); 
        
+      displayWidth = widOrg;
+      displayHeight = heightOrg;
+      
       // 宽 高 比列 
       float scaleWid = (float)width/widOrg; 
       float scaleHeight = (float)height/heightOrg; 
@@ -122,6 +132,18 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
      
       savedMatrix.set(matrix); 
      } 
+     
+    /**
+     * 还原图片大小位置 
+     */
+    public void resetPoint(){
+    	
+    	 matrix.setScale(defaultScale,defaultScale); 
+    	 bmp.setImageMatrix(matrix); 
+         matrix.postTranslate(mainWidth / 2 - defaultScale * displayWidth / 2, mainHeight / 2 - defaultScale * displayHeight / 2);
+         bmp.setImageMatrix(matrix); 
+    }
+     
       @Override 
     public boolean onTouch(View v, MotionEvent event) { 
         // TODO Auto-generated method stub 
@@ -155,7 +177,16 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
                 { 
                     //这里就是做你上一页下一页的事情了。 
 //                    Toast.makeText(this, "----do something-----", 1000).show(); 
+                	// 如果缩放比例小于默认比例则还原图片的位置
                 } 
+                if(isScale()){
+                	resetPoint();
+                }else{
+                	
+                }
+                System.out.println("up...");
+                
+                
                 break; 
             case MotionEvent.ACTION_MOVE: 
                  
@@ -176,33 +207,55 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
 					float matrixX = values[2];
 					float matrixY = values[5];
                 	
-					System.out.println("widthScale -> "+widthScale+" ,heightScale -> "+heightScale);
-					System.out.println("matrixX -> "+matrixX+" ,matrixY -> "+matrixY);
 					
                 	float dx = event.getX()-start.x;
                 	float dy = event.getY()-start.y;
                 	
-                	if(widthScale > 0){
+                	// 如果当前大小比例大于默认比例
+                	if(widthScale > defaultScale){
+                		System.out.println("widthScale -> "+widthScale+" ,heightScale -> "+heightScale);
+    					System.out.println("matrixX -> "+matrixX+" ,matrixY -> "+matrixY);
+    					
+    					// 获取边界比例值
+    					float cScale = widthScale - defaultScale;
+    					
+    					System.out.println(heightScale * displayHeight);
+    					
+    					// 左边界判断，左边界的x值为0
+    					if(matrixX + dx >= 0){
+    						dx = 0;
+    					}
+    					
+    					// 右边界判断，右边界的x值为cScale*displayWidth
+    					if(matrixX + dx + - mainWidth <= -(widthScale*displayWidth)){
+    						dx = 0;
+    					}
+    					
+    					// 上边界判断，上边界的y值为0
+    					if(matrixY + dy >= 0){
+    						dy = 0;
+    					}
+    					
+    					// 下边界判断，下边界的y值为cScale*displayHeight
+    					if(matrixY + dy + -mainHeight <= -(heightScale * displayHeight)){
+    						dy = 0;
+    					}
+//                		
+    					
+    					
+    					
                 		
-                	}
-                	
-                	
-                	if(matrixX + dx < 0){
+                	}else if(widthScale < defaultScale){
+                	// 如果当前大小比例小于默认比例
                 		dx = 0;
-                	}
-                	
-                	if(matrixY + dy < 0){
                 		dy = 0;
                 	}
                 	
-                	System.out.println("dx -> "+dx+" ,dy -> "+dy);
+                	
                 	
                 	matrix.postTranslate(dx, dy);
                 	
                 	start.set(event.getX(), event.getY());
-                	
-                	
-                	
                 	
                      
                 } 
@@ -213,6 +266,9 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
 //                  matrix.set(savedMatrix); 
                     float scale = newDist / oldDist; 
 //                    System.out.println("scale=="+scale); 
+                    
+                    
+                    
                     matrix.postScale(scale, scale, mid.x, mid.y); 
                     } 
                     oldDist = newDist; 
@@ -223,18 +279,41 @@ public class SAFBitmapBrowser extends Activity implements OnTouchListener,OnClic
                 if (oldDist > 10f) { 
                     midPoint(mid, event); 
                     mode = ZOOM; 
-                    } 
+                }
+                
 //                System.out.println("ACTION_POINTER_DOWN"); 
                 break; 
             case MotionEvent.ACTION_POINTER_UP: 
 //                System.out.println("ACTION_POINTER_UP"); 
+            	
+				
+				// 如果缩放比例小于默认比例则还原图片的位置
+				if(isScale()){
+					resetPoint();
+				}
                 break; 
           } 
           bmp.setImageMatrix(matrix); 
         return false; 
     } 
- 
-     
+    /**
+     * 判断缩放比例是否比默认比例大了
+     * @return
+     */
+    public boolean isScale(){
+    	float[] values = new float[9];
+		bmp.getImageMatrix().getValues(values);
+    	
+		// matrix矩阵中的宽度和高度缩放值
+		float widthScale = values[0];
+		float heightScale = values[4];
+		
+		// matrix矩阵中的x,y偏移量
+		float matrixX = values[2];
+		float matrixY = values[5];
+		return widthScale <= defaultScale;
+    } 
+      
  
     @Override 
     public void onClick(View v) { 
