@@ -34,6 +34,25 @@ public class SAFImageCompress {
 	}
 	
 	/**
+	 * 从本地根据fid获取一个Bitmap
+	 * @param fid
+	 * @return
+	 * @throws SAFException 
+	 */
+	public Bitmap LocalAutoCompress(String fid) throws SAFException{
+		BitmapFactory.Options options = new Options();
+		options.inPreferredConfig = Bitmap.Config.RGB_565;
+		SAFCache cache = SAFCache.getInstance();
+		
+		try {
+			return BitmapFactory.decodeStream(cache.readFilesCache(fid), null, options);
+		} catch (FileNotFoundException e) {
+			throw new SAFException(0, e.getMessage(), e);
+		}
+		
+	}
+	
+	/**
 	 * 根据url获取一个bitmap,适应于全屏模式
 	 * @param url
 	 * @return

@@ -38,8 +38,7 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".activity.SAFBitmapBrowser"></activity>
-        <activity android:name=".activity.test"></activity>
+        <activity android:name=".SAFImageViewActivity"></activity>
     </application>
 
 </manifest>

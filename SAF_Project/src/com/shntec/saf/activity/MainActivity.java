@@ -9,6 +9,8 @@ import com.shntec.saf.SAFCache;
 import com.shntec.saf.SAFException;
 import com.shntec.saf.SAFHTTPTransport;
 import com.shntec.saf.SAFImageCompress;
+import com.shntec.saf.SAFImageViewActivity;
+import com.shntec.saf.SAFUtils;
 import com.shntec.saf.R.id;
 import com.shntec.saf.R.layout;
 import com.shntec.saf.R.menu;
@@ -56,7 +58,8 @@ public class MainActivity extends Activity {
 								@Override
 								public void onClick(View arg0) {
 									// TODO Auto-generated method stub
-									Intent intent = new Intent(MainActivity.this, SAFBitmapBrowser.class);
+									Intent intent = new Intent(MainActivity.this, SAFImageViewActivity.class);
+									intent.putExtra("imageFID", SAFUtils.getMD5Str("http://img6.faloo.com/picture/0x0/0/444/444440.jpg"));
 									startActivity(intent);
 									
 								}
