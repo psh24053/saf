@@ -8,8 +8,6 @@ import java.io.InputStream;
 
 import org.apache.http.HttpEntity;
 
-import com.shntec.saf.SAFTransportProgressInputStream.onTransportProgressListener;
-
 import android.app.Application;
 import android.content.Context;
 import android.graphics.Bitmap;
@@ -67,6 +65,16 @@ public class SAFImageCompress {
 		
 		String md5 = SAFUtils.getMD5Str(url);
 		
+		// 如果缓存中已经存在这张图片，则直接返回
+		if(cache.hasFilesCache(md5)){
+			// 生成bitmap
+			try {
+				return BitmapFactory.decodeStream(cache.readFilesCache(md5), null, options);
+			} catch (FileNotFoundException e) {
+				throw new SAFException(0, e.getMessage(), e);
+			}
+		}
+		
 		// 首先将图片存入本地缓存
 		try {
 			cache.SaveFilesCache(md5, httptransport.download(url, listener));
@@ -104,14 +112,20 @@ public class SAFImageCompress {
 		
 		String md5 = SAFUtils.getMD5Str(url);
 		
-		// 首先将图片存入本地缓存
-		try {
-			cache.SaveFilesCache(md5, httptransport.download(url, listener));
-		} catch (IllegalStateException e) {
-			throw new SAFException(0, e.getMessage(), e);
-		} catch (IOException e) {
-			throw new SAFException(0, e.getMessage(), e);
+		// 如果缓存中存在这张图片，则不下载直接进行读取
+		if(!cache.hasFilesCache(md5)){
+			// 首先将图片存入本地缓存
+			try {
+				cache.SaveFilesCache(md5, httptransport.download(url, listener));
+			} catch (IllegalStateException e) {
+				throw new SAFException(0, e.getMessage(), e);
+			} catch (IOException e) {
+				throw new SAFException(0, e.getMessage(), e);
+			}
 		}
+		
+		
+		
 		
 		
 		Bitmap bitmap = null;
@@ -126,7 +140,7 @@ public class SAFImageCompress {
 		int bwidth = options.outWidth;
 		int bheight = options.outHeight;
 		
-		Log.i("SAF", "w "+bwidth+" ,h "+bheight);
+//		Log.i("SAF", "w "+bwidth+" ,h "+bheight);
 		
 		int be = 1;//be=1表示不缩放  
 	    if (bwidth > bheight && bwidth > width) {//如果宽度大的话根据宽度固定大小缩放  
@@ -163,25 +177,43 @@ public class SAFImageCompress {
 		BitmapFactory.Options options = new Options();
 		// 设置这个Bitmap不获取像素矩阵，只获取大小参数
 		options.inJustDecodeBounds = true;
+		options.inPreferredConfig = Bitmap.Config.RGB_565;
 		
+		SAFCache cache = SAFCache.getInstance();
 		SAFHTTP http = new SAFHTTP();
-		Bitmap bitmap = null;
-		HttpEntity entity = http.GET(url).getEntity();
-		long totalSize = entity.getContentLength();
-		InputStream in = null;
+		SAFHTTPTransport httptransport = new SAFHTTPTransport();
 		
-		try {
-			in = entity.getContent();
-//			bitmap = BitmapFactory.decodeStream(in, null, options);
-		} catch (IllegalStateException e) {
-			throw new SAFException(0, e.getMessage(), e);
-		} catch (IOException e) {
-			throw new SAFException(0, e.getMessage(), e);
+		String md5 = SAFUtils.getMD5Str(url);
+		
+		// 如果缓存中存在这张图片，则不下载直接进行读取
+		if(!cache.hasFilesCache(md5)){
+			// 首先将图片存入本地缓存
+			try {
+				cache.SaveFilesCache(md5, httptransport.download(url, listener));
+			} catch (IllegalStateException e) {
+				throw new SAFException(0, e.getMessage(), e);
+			} catch (IOException e) {
+				throw new SAFException(0, e.getMessage(), e);
+			}
 		}
+		
+		
+		Bitmap bitmap = null;
+		long totalSize = 0;
+		try {
+			totalSize = cache.readFileSize(md5);
+		} catch (FileNotFoundException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+		
+		
 		// 将bitmap设置为正常加载模式
 		options.inJustDecodeBounds = false;
 		// 设置bitmap的色彩模式为RGB565，每个像素占两个字节
-		options.inPreferredConfig = Bitmap.Config.RGB_565;
 		
 		// 如果图片的大小大于100k则执行压缩
 		if(totalSize / 1024 > 100){
@@ -195,13 +227,12 @@ public class SAFImageCompress {
 			options.inSampleSize = m;
 		}
 		
-		bitmap = BitmapFactory.decodeStream(in, null, options);
-		
 		try {
-			in.close();
-		} catch (IOException e) {
+			bitmap = BitmapFactory.decodeStream(cache.readFilesCache(md5), null, options);
+		} catch (FileNotFoundException e) {
 			throw new SAFException(0, e.getMessage(), e);
 		}
+		
 		return bitmap;
 		
 	}

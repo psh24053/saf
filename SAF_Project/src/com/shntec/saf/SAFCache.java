@@ -611,6 +611,38 @@ public class SAFCache {
 		return fis;
 	}
 	/**
+	 * 根据key，获取指定文件缓存的大小
+	 * @param key
+	 * @return
+	 * @throws IOException 
+	 */
+	public long readFileSize(String key) throws IOException{
+		File readFile = null;
+		//如果fileCache中存在这个key，则使用这个file
+		//否则将从cacheDir中遍历读取
+		Log.i(TAG, "cacheManager.readFilesCache -> " +key);
+		if(fileCache.containsKey(key)){
+			readFile = fileCache.get(key);
+		}else{
+			//直接调用hasFilesCache方法来判断文件是否存在，如果不存在则返回false
+			if(!hasFilesCache(key)){
+				Log.i(TAG, "cacheManager.readFilesCache -> " +key+" -> null");
+				return 0;
+			}else{
+				readFile = fileCache.get(key);
+			}
+			
+		}
+		
+		// 创建文件输入流
+		FileInputStream fis = new FileInputStream(readFile);
+		long totalSize = fis.available();
+		Log.i(TAG, "cacheManager.readFileSize -> " +key +" -> true -> by "+totalSize);
+		fis.close();
+		return totalSize;
+	}
+	
+	/**
 	 * 读取一个文件缓存，根据key
 	 * @param key
 	 * @return

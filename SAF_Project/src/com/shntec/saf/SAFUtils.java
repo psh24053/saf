@@ -14,6 +14,7 @@ import java.util.regex.Pattern;
 import org.apache.commons.codec.digest.DigestUtils;
 
 
+import android.content.Context;
 import android.util.Log;
 
 public class SAFUtils {
@@ -39,7 +40,37 @@ public class SAFUtils {
 		
 		return result.getBytes();
 	}
+	/**
+	 * 将一个inputstream，以字符串的形式返回
+	 * @param in
+	 * @return
+	 */
+	public static String readInputStreamToString(InputStream in){
+		String result = "";
+		byte[] readByte = new byte[1024];
+		int readCount = -1;
+		
+		try {
+			while((readCount = in.read(readByte, 0, 1024)) != -1){
+				result += new String(readByte).trim();
+			}
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
+		return result;
+	}
 	
+	/**
+	 * 将输入的dp转换为对应的px值，并返回px值
+	 * @param dp
+	 * @param c
+	 * @return
+	 */
+	public static int dp2px(int dp, Context c) {
+
+		return (int) (dp * c.getResources().getDisplayMetrics().density + 0.5f);
+	}
 	/**
 	 * 半角转换为全角
 	 * 

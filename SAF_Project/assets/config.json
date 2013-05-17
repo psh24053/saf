@@ -1,0 +1,8 @@
+{
+	"ConfigVersion" : 1,  // 必须
+	"DynamicConfig" : "SAF_Dynamic_Config",  // 必须
+	"ConfigContent" : {   // 必须
+		
+	
+	}
+}

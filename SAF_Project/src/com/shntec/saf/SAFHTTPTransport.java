@@ -9,7 +9,6 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.FileBody;
 import org.apache.http.entity.mime.content.InputStreamBody;
 
-import com.shntec.saf.SAFTransportProgressInputStream.onTransportProgressListener;
 
 /**
  * 基于HTTP的上传下载，支持进度
@@ -60,6 +59,7 @@ public class SAFHTTPTransport {
 			throw new SAFException(0, e.getMessage(), e);
 		}
 	}
+	
 	
 	/**
 	 * 以HTTP的方式上传文件信息，返回Httpresponse，接收SAFMultipartEntity对象

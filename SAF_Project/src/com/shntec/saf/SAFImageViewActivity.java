@@ -19,7 +19,9 @@ import android.view.GestureDetector.OnDoubleTapListener;
 import android.view.GestureDetector.OnGestureListener;
 import android.view.View.OnClickListener;
 import android.view.View.OnTouchListener;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 /**
  * 大图片浏览器
@@ -52,6 +54,10 @@ public class SAFImageViewActivity extends Activity implements OnTouchListener,On
 	private long beginTime, endTime;
 	
 	private String imageFID;
+	private String bigImageUrl;
+	private FrameLayout progress_framelayout;
+	private ProgressBar progress_bar;
+	
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -72,9 +78,14 @@ public class SAFImageViewActivity extends Activity implements OnTouchListener,On
 		displayHeight = dm.heightPixels;
 		
 		imageView = (ImageView) findViewById(R.id.imageview);
+		progress_framelayout = (FrameLayout) findViewById(R.id.progress_framelayout);
+		progress_bar = (ProgressBar) findViewById(R.id.progress_bar);
 		
-		// 获取传递过来的imageFID
+		// 获取传递过来的imageFID和bigImageUrl
 		imageFID = getIntent().getStringExtra("imageFID");
+		bigImageUrl = getIntent().getStringExtra("bigImageUrl");
+		
+		initButtonEvent();
 		
 		// 如果imageFID为空，则不执行任何逻辑
 		if(imageFID == null || imageFID == ""){
@@ -88,30 +99,126 @@ public class SAFImageViewActivity extends Activity implements OnTouchListener,On
 		} catch (SAFException e) {
 			e.printStackTrace();
 		}
-		
+		// 初始化图片信息
 		calculateScale();
+		initImageInfo();
+		
+		// 如果bigImageUrl不为空，则开始从网络上下载
+		if(bigImageUrl != null && bigImageUrl != ""){
+			progress_framelayout.setVisibility(View.VISIBLE);
+			new Thread(new Runnable() {
+				
+				@Override
+				public void run() {
+					// TODO Auto-generated method stub
+					try {
+						loadBigImageUrl();
+					} catch (SAFException e) {
+						e.printStackTrace();
+					}
+					
+				}
+			}).start();
+		}
 		
 		
+		
+	}
+	/**
+	 * 初始化按钮事件
+	 */
+	public void initButtonEvent(){
+		findViewById(R.id.header_buttons_back).setOnClickListener(this);
+	}
+	
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+		
+		// 页面被注销后，需要释放内存
+		imageView.setImageBitmap(null);
+		if(bitmap != null && !bitmap.isRecycled()){
+			bitmap.recycle();
+		}
+		
+		
+	}
+	/**
+	 * 从网络上获取大图，并加载到bitmap中
+	 * @throws SAFException 
+	 */
+	public void loadBigImageUrl() throws SAFException{
+		SAFImageCompress imageCompress = new SAFImageCompress(new onTransportProgressListener() {
+			
+			@Override
+			public void onProgress(long readSize, long totalSize) {
+				// TODO Auto-generated method stub
+				final int pro = (int) ((float)readSize / totalSize * 100);
+				runOnUiThread(new Runnable() {
+					public void run() {
+						if(pro > progress_bar.getProgress()){
+							progress_bar.setProgress(pro);
+						}
+					}
+				});
+			}
+			
+			@Override
+			public void onComplete() {
+				// TODO Auto-generated method stub
+			}
+		});
+		
+		// 从网络上下载图片，然后重新判断newBitmap是否为空并且是否与原bitmap相同
+		Bitmap newBitmap = imageCompress.HttpFullScreenCompress(bigImageUrl);
+		if(newBitmap != null && newBitmap != bitmap){
+			bitmap.recycle();
+			bitmap = newBitmap;
+		}
+		
+		runOnUiThread(new Runnable() {
+			public void run() {
+				// 初始化图片信息
+				calculateScale();
+				initImageInfo();
+				// 隐藏进度条
+				progress_framelayout.setVisibility(View.GONE);
+				progress_bar.setVisibility(View.GONE);
+			}
+		});
+		
+	}
+	
+	/**
+	 * 初始化图片信息
+	 */
+	public void initImageInfo(){
 		// 初始化图片信息 
 		imageView.setImageBitmap(bitmap);
+		matrix.reset();
 		matrix.postScale(defaultScale, defaultScale);
 		matrix.postTranslate(displayWidth / 2 - defaultScale * imageWidth / 2, displayHeight / 2 - defaultScale
 				* imageHeight / 2);
 		imageView.setImageMatrix(matrix);
 
 		imageView.setOnTouchListener(this);
-
+		imageView.setOnClickListener(this);
 		imageView.setLongClickable(true);
 		
 		mGestureDetector = new GestureDetector(this, this);
 		
 		savedMatrix.set(matrix);
-		
 	}
+	
+
 	/**
 	 * 计算各种比例
 	 */
 	public void calculateScale(){
+		imageWidth = bitmap.getWidth();
+		imageHeight = bitmap.getHeight();
+		
 		float scaleWid = (float) displayWidth / imageWidth;
 		float scaleHeight = (float) displayHeight / imageHeight;
 
@@ -124,7 +231,7 @@ public class SAFImageViewActivity extends Activity implements OnTouchListener,On
 		
 	}
 	/**
-	 * 根据imageFID加载图片
+	 * 根据imageFID加载本地图片
 	 * @throws SAFException 
 	 */
 	public void loadImageByFID() throws SAFException{
@@ -133,8 +240,6 @@ public class SAFImageViewActivity extends Activity implements OnTouchListener,On
 		
 		bitmap = imageCompress.LocalAutoCompress(imageFID);
 		
-		imageWidth = bitmap.getWidth();
-		imageHeight = bitmap.getHeight();
 		
 	}
 	
@@ -512,6 +617,14 @@ public class SAFImageViewActivity extends Activity implements OnTouchListener,On
 	@Override
 	public boolean onSingleTapConfirmed(MotionEvent arg0) {
 		// TODO Auto-generated method stub
+		// 点击图片打开退出按钮
+		int visibile = findViewById(R.id.header_buttons).getVisibility();
+		if(visibile == View.GONE){
+			findViewById(R.id.header_buttons).setVisibility(View.VISIBLE);
+		}else {
+			findViewById(R.id.header_buttons).setVisibility(View.GONE);
+		}
+					
 		return false;
 	}
 	@Override
@@ -549,6 +662,18 @@ public class SAFImageViewActivity extends Activity implements OnTouchListener,On
 	@Override
 	public void onClick(View v) {
 		// TODO Auto-generated method stub
+		switch (v.getId()) {
+		case R.id.header_buttons_back:
+			// 离开页面事件
+			finish();
+			break;
+		case R.id.imageview:
+			
+			break;
+		default:
+			break;
+		}
+		
 		
 	}
 	

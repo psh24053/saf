@@ -6,15 +6,16 @@ import java.io.InputStream;
 
 import com.shntec.saf.R;
 import com.shntec.saf.SAFCache;
+import com.shntec.saf.SAFConfig;
 import com.shntec.saf.SAFException;
 import com.shntec.saf.SAFHTTPTransport;
 import com.shntec.saf.SAFImageCompress;
 import com.shntec.saf.SAFImageViewActivity;
+import com.shntec.saf.SAFLoader;
 import com.shntec.saf.SAFUtils;
 import com.shntec.saf.R.id;
 import com.shntec.saf.R.layout;
 import com.shntec.saf.R.menu;
-import com.shntec.saf.SAFTransportProgressInputStream.onTransportProgressListener;
 
 import android.os.Bundle;
 import android.annotation.SuppressLint;
@@ -34,7 +35,16 @@ public class MainActivity extends Activity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
-		SAFCache cache = SAFCache.getInstance(this);
+		
+		// 加载SAF
+		try {
+			SAFLoader.loader(this);
+		} catch (SAFException e) {
+			e.printStackTrace();
+		}
+		
+		System.out.println(SAFConfig.getInstance().getConfigVersion());
+		
 		
 		
 		
@@ -60,6 +70,7 @@ public class MainActivity extends Activity {
 									// TODO Auto-generated method stub
 									Intent intent = new Intent(MainActivity.this, SAFImageViewActivity.class);
 									intent.putExtra("imageFID", SAFUtils.getMD5Str("http://img6.faloo.com/picture/0x0/0/444/444440.jpg"));
+									intent.putExtra("bigImageUrl", "http://www.sucaitianxia.com/photo/pic/201001/gefnegs48.jpg");
 									startActivity(intent);
 									
 								}

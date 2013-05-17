@@ -6,7 +6,6 @@ import java.io.OutputStream;
 
 import org.apache.http.entity.mime.MultipartEntity;
 
-import com.shntec.saf.SAFTransportProgressInputStream.onTransportProgressListener;
 
 /**
  * 支持进度的MultipartEntity，HTTP上传专用

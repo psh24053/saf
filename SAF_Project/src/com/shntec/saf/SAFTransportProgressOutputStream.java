@@ -4,7 +4,6 @@ import java.io.FilterOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.shntec.saf.SAFTransportProgressInputStream.onTransportProgressListener;
 
 public class SAFTransportProgressOutputStream extends FilterOutputStream {
 
