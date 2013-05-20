@@ -12,6 +12,7 @@ public class SAFLoader {
 	public static void loader(Context context) throws SAFException{
 		SAFCache cache = SAFCache.getInstance(context);
 		SAFConfig config = SAFConfig.getInstance(context);
+		SAFRunner.init(context);
 	}
 	
 }

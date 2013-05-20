@@ -12,11 +12,15 @@ import com.shntec.saf.SAFHTTPTransport;
 import com.shntec.saf.SAFImageCompress;
 import com.shntec.saf.SAFImageViewActivity;
 import com.shntec.saf.SAFLoader;
+import com.shntec.saf.SAFRunner;
+import com.shntec.saf.SAFRunnerAdapter;
 import com.shntec.saf.SAFUtils;
+import com.shntec.saf.onTransportProgressListener;
 import com.shntec.saf.R.id;
 import com.shntec.saf.R.layout;
 import com.shntec.saf.R.menu;
 
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -43,57 +47,84 @@ public class MainActivity extends Activity {
 			e.printStackTrace();
 		}
 		
-		System.out.println(SAFConfig.getInstance().getConfigVersion());
 		
-		
-		
-		
-		new Thread(new Runnable() {
-			
-			@Override
-			public void run() {
-				// TODO Auto-generated method stub
-				SAFHTTPTransport t = new SAFHTTPTransport();
-				SAFImageCompress ic = new SAFImageCompress();
-				try {
-					
-					final Bitmap b = ic.HttpFixedCompress("http://img6.faloo.com/picture/0x0/0/444/444440.jpg",160,120);
-					
-					runOnUiThread(new Runnable() {
-						public void run() {
-							ImageView image = (ImageView) findViewById(R.id.image);
-							image.setImageBitmap(b);
-							image.setOnClickListener(new OnClickListener() {
-								
-								@Override
-								public void onClick(View arg0) {
-									// TODO Auto-generated method stub
-									Intent intent = new Intent(MainActivity.this, SAFImageViewActivity.class);
-									intent.putExtra("imageFID", SAFUtils.getMD5Str("http://img6.faloo.com/picture/0x0/0/444/444440.jpg"));
-									intent.putExtra("bigImageUrl", "http://www.sucaitianxia.com/photo/pic/201001/gefnegs48.jpg");
-									startActivity(intent);
-									
-								}
-							});
-							Log.i("SAF", b.getWidth()+" ,"+b.getHeight());
-						}
-					});
-					
-					
-				} catch (SAFException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				} 
-				
-				
-				
-			}
-		}).start();
-		
-		
+		new abc().execute("");
+
 		
 	}
 
+	private class abc extends SAFRunnerAdapter<String, Integer, Bitmap>{
+
+		@Override
+		public void onPreExecute() {
+			// TODO Auto-generated method stub
+			super.onPreExecute();
+			
+			System.out.println("onPreExecute");
+			
+		}
+		@Override
+		public void onProgressUpdate(Integer... progress) {
+			// TODO Auto-generated method stub
+			super.onProgressUpdate(progress);
+			
+			System.out.println("progress -> "+progress);
+			
+		}
+		@Override
+		public Bitmap doInBackground(String... params) {
+			// TODO Auto-generated method stub
+			
+			SAFImageCompress ic = new SAFImageCompress(new onTransportProgressListener() {
+				
+				@Override
+				public void onProgress(long readSize, long totalSize) {
+					// TODO Auto-generated method stub
+					int pro = (int) ((float) readSize / (float) totalSize * 100);
+					publishProgress(pro);
+				}
+				
+				@Override
+				public void onComplete() {
+					// TODO Auto-generated method stub
+					System.out.println("onComplete");
+				}
+			});
+			
+			try {
+				return ic.HttpFixedCompress("http://img6.faloo.com/picture/0x0/0/444/444440.jpg",160,120);
+			} catch (SAFException e) {
+				e.printStackTrace();
+			}
+			
+			return null;
+		}
+		@Override
+		public void onPostExecute(Bitmap result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			
+			ImageView image = (ImageView) findViewById(R.id.image);
+			image.setImageBitmap(result);
+			image.setOnClickListener(new OnClickListener() {
+				
+				@Override
+				public void onClick(View arg0) {
+					// TODO Auto-generated method stub
+					Intent intent = new Intent(MainActivity.this, test.class);
+					intent.putExtra("imageFID", SAFUtils.getMD5Str("http://img6.faloo.com/picture/0x0/0/444/444440.jpg"));
+					intent.putExtra("bigImageUrl", "http://www.sucaitianxia.com/photo/pic/201001/gefnegs48.jpg");
+					startActivity(intent);
+					
+				}
+			});
+			Log.i("SAF", result.getWidth()+" ,"+result.getHeight());
+			
+		}
+		
+	}
+	
+	
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
 		// Inflate the menu; this adds items to the action bar if it is present.

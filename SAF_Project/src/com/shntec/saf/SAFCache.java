@@ -354,7 +354,7 @@ public class SAFCache {
 				//则代表对象缓存中存在这个key
 				if(itemFile.exists() && itemFile.isFile() && itemFile.canRead() && itemFile.canWrite() && itemFile.getName().equals(key)){
 					//将这个itemFile加入到内存中，为近期使用做准备
-					Log.i(TAG, "cacheManager.hasFilesCache -> " +key+" -> true by sdcard");
+					Log.i(TAG, "safCache.hasFilesCache -> " +key+" -> true by sdcard");
 					fileCache.put(key, itemFile);
 					return true;
 				}
@@ -371,7 +371,7 @@ public class SAFCache {
 			//则代表对象缓存中存在这个key
 			if(itemFile.exists() && itemFile.isFile() && itemFile.canRead() && itemFile.canWrite() && itemFile.getName().equals(key)){
 				//将这个itemFile加入到内存中，为近期使用做准备
-				Log.i(TAG, "cacheManager.hasFilesCache -> " +key+" -> true by rom");
+				Log.i(TAG, "safCache.hasFilesCache -> " +key+" -> true by rom");
 				fileCache.put(key, itemFile);
 				return true;
 			}
@@ -388,7 +388,7 @@ public class SAFCache {
 	 */
 	public boolean hasObjectCache(String key){
 
-		Log.i(TAG, "cacheManager.hasObjectCache -> " +key);
+		Log.i(TAG, "safCache.hasObjectCache -> " +key);
 		
 		//得到文件数组
 		File[] files = cacheDir.listFiles();
@@ -399,13 +399,13 @@ public class SAFCache {
 			//则代表对象缓存中存在这个key
 			if(itemFile.exists() && itemFile.isFile() && itemFile.canRead() && itemFile.canWrite() && itemFile.getName().equals(key)){
 				//将这个itemFile加入到内存中，为近期使用做准备
-				Log.i(TAG, "cacheManager.hasObjectCache -> " +key+" -> true");
+				Log.i(TAG, "safCache.hasObjectCache -> " +key+" -> true");
 				fileCache.put(key, itemFile);
 				return true;
 			}
 		}
 		
-		Log.i(TAG, "cacheManager.hasObjectCache -> " +key+" -> false");
+		Log.i(TAG, "safCache.hasObjectCache -> " +key+" -> false");
 		return false;
 	}
 	
@@ -442,7 +442,7 @@ public class SAFCache {
 					//创建输出文件对象
 					File outFile = new File(filesDir, key);
 
-					Log.i(TAG, "cacheManager.SaveFilesCache -> " +key+" -> by rom");
+					Log.i(TAG, "safCache.SaveFilesCache -> " +key+" -> by rom");
 					// 创建缓冲输入流
 					BufferedInputStream bis = new BufferedInputStream(is);
 					
@@ -464,7 +464,7 @@ public class SAFCache {
 					baos.close();
 					
 					// 将这个文件加入到FileCache中
-					Log.i(TAG, "cacheManager.SaveFilesCache -> " +key+" -> true -> by sdcard");
+					Log.i(TAG, "safCache.SaveFilesCache -> " +key+" -> true -> by sdcard");
 					fileCache.put(key, outFile);
 					return true;
 					
@@ -476,7 +476,7 @@ public class SAFCache {
 				//创建输出文件对象
 				File outFile = new File(sdCardFilesDir, key);
 
-				Log.i(TAG, "cacheManager.SaveFilesCache -> " +key+" -> by sdcard");
+				Log.i(TAG, "safCache.SaveFilesCache -> " +key+" -> by sdcard");
 				// 创建缓冲输入流
 				BufferedInputStream bis = new BufferedInputStream(is);
 				
@@ -497,7 +497,7 @@ public class SAFCache {
 				baos.close();
 				
 				// 将这个文件加入到FileCache中
-				Log.i(TAG, "cacheManager.SaveFilesCache -> " +key+" -> true -> by sdcard");
+				Log.i(TAG, "safCache.SaveFilesCache -> " +key+" -> true -> by sdcard");
 				fileCache.put(key, outFile);
 				return true;
 				
@@ -516,7 +516,7 @@ public class SAFCache {
 			//创建输出文件对象
 			File outFile = new File(filesDir, key);
 
-			Log.i(TAG, "cacheManager.SaveFilesCache -> " +key+" -> by rom");
+			Log.i(TAG, "safCache.SaveFilesCache -> " +key+" -> by rom");
 			// 创建缓冲输入流
 			BufferedInputStream bis = new BufferedInputStream(is);
 			
@@ -537,7 +537,7 @@ public class SAFCache {
 			fos.close();
 			baos.close();
 			// 将这个文件加入到FileCache中
-			Log.i(TAG, "cacheManager.SaveFilesCache -> " +key+" -> true -> by rom");
+			Log.i(TAG, "safCache.SaveFilesCache -> " +key+" -> true -> by rom");
 			fileCache.put(key, outFile);
 			return true;
 			
@@ -562,7 +562,7 @@ public class SAFCache {
 		//创建输出文件对象
 		File outFile = new File(cacheDir, key);
 
-		Log.i(TAG, "cacheManager.SaveObjectCache -> " +key+" -> "+object.toString());
+		Log.i(TAG, "safCache.SaveObjectCache -> " +key+" -> "+object.toString());
 		// 创建文件输出流
 		FileOutputStream fos = new FileOutputStream(outFile);
 		// 创建对象输出流，传入文件输出流
@@ -574,7 +574,7 @@ public class SAFCache {
 		fos.close();
 		
 		// 将这个文件加入到FileCache中
-		Log.i(TAG, "cacheManager.SaveObjectCache -> " +key+" -> "+object.toString()+" -> true");
+		Log.i(TAG, "safCache.SaveObjectCache -> " +key+" -> "+object.toString()+" -> true");
 		fileCache.put(key, outFile);
 		return true;
 		
@@ -590,13 +590,13 @@ public class SAFCache {
 		File readFile = null;
 		//如果fileCache中存在这个key，则使用这个file
 		//否则将从cacheDir中遍历读取
-		Log.i(TAG, "cacheManager.readFilesCache -> " +key);
+		Log.i(TAG, "safCache.readFilesCache -> " +key);
 		if(fileCache.containsKey(key)){
 			readFile = fileCache.get(key);
 		}else{
 			//直接调用hasFilesCache方法来判断文件是否存在，如果不存在则返回false
 			if(!hasFilesCache(key)){
-				Log.i(TAG, "cacheManager.readFilesCache -> " +key+" -> null");
+				Log.i(TAG, "safCache.readFilesCache -> " +key+" -> null");
 				return null;
 			}else{
 				readFile = fileCache.get(key);
@@ -607,7 +607,7 @@ public class SAFCache {
 		// 创建文件输入流
 		FileInputStream fis = new FileInputStream(readFile);
 		
-		Log.i(TAG, "cacheManager.readFilesCache -> " +key +" -> true -> by "+(sdCard?"sdcard":"rom"));
+		Log.i(TAG, "safCache.readFilesCache -> " +key +" -> true -> by "+(sdCard?"sdcard":"rom"));
 		return fis;
 	}
 	/**
@@ -620,13 +620,13 @@ public class SAFCache {
 		File readFile = null;
 		//如果fileCache中存在这个key，则使用这个file
 		//否则将从cacheDir中遍历读取
-		Log.i(TAG, "cacheManager.readFilesCache -> " +key);
+		Log.i(TAG, "safCache.readFilesCache -> " +key);
 		if(fileCache.containsKey(key)){
 			readFile = fileCache.get(key);
 		}else{
 			//直接调用hasFilesCache方法来判断文件是否存在，如果不存在则返回false
 			if(!hasFilesCache(key)){
-				Log.i(TAG, "cacheManager.readFilesCache -> " +key+" -> null");
+				Log.i(TAG, "safCache.readFilesCache -> " +key+" -> null");
 				return 0;
 			}else{
 				readFile = fileCache.get(key);
@@ -637,7 +637,7 @@ public class SAFCache {
 		// 创建文件输入流
 		FileInputStream fis = new FileInputStream(readFile);
 		long totalSize = fis.available();
-		Log.i(TAG, "cacheManager.readFileSize -> " +key +" -> true -> by "+totalSize);
+		Log.i(TAG, "safCache.readFileSize -> " +key +" -> true -> by "+totalSize);
 		fis.close();
 		return totalSize;
 	}
@@ -652,13 +652,13 @@ public class SAFCache {
 		File readFile = null;
 		//如果fileCache中存在这个key，则使用这个file
 		//否则将从cacheDir中遍历读取
-		Log.i(TAG, "cacheManager.readFilesCache -> " +key);
+		Log.i(TAG, "safCache.readFilesCache -> " +key);
 		if(fileCache.containsKey(key)){
 			readFile = fileCache.get(key);
 		}else{
 			//直接调用hasFilesCache方法来判断文件是否存在，如果不存在则返回false
 			if(!hasFilesCache(key)){
-				Log.i(TAG, "cacheManager.readFilesCache -> " +key+" -> null");
+				Log.i(TAG, "safCache.readFilesCache -> " +key+" -> null");
 				return null;
 			}else{
 				readFile = fileCache.get(key);
@@ -667,7 +667,7 @@ public class SAFCache {
 		}
 		
 		
-		Log.i(TAG, "cacheManager.readFilesCache -> " +key +" -> true -> by "+(sdCard?"sdcard":"rom"));
+		Log.i(TAG, "safCache.readFilesCache -> " +key +" -> true -> by "+(sdCard?"sdcard":"rom"));
 		return readFile;
 	}
 
@@ -683,13 +683,13 @@ public class SAFCache {
 		File readFile = null;
 		//如果fileCache中存在这个key，则使用这个file
 		//否则将从cacheDir中遍历读取
-		Log.i(TAG, "cacheManager.readObjectCache -> " +key);
+		Log.i(TAG, "safCache.readObjectCache -> " +key);
 		if(fileCache.containsKey(key)){
 			readFile = fileCache.get(key);
 		}else{
 			//直接调用hasObjectCache方法来判断文件是否存在，如果不存在则返回false
 			if(!hasObjectCache(key)){
-				Log.i(TAG, "cacheManager.readObjectCache -> " +key+" -> null");
+				Log.i(TAG, "safCache.readObjectCache -> " +key+" -> null");
 				return null;
 			}else{
 				readFile = fileCache.get(key);
@@ -711,7 +711,7 @@ public class SAFCache {
 		fis.close();
 		
 		
-		Log.i(TAG, "cacheManager.readObjectCache -> " +key+" -> "+o.toString());
+		Log.i(TAG, "safCache.readObjectCache -> " +key+" -> "+o.toString());
 		return o;
 		
 		
@@ -725,7 +725,7 @@ public class SAFCache {
 		
 		if(hasObjectCache(key)){
 			File removeFile = fileCache.get(key);
-			Log.i(TAG, "cacheManager.removeObjectCache -> " +key);
+			Log.i(TAG, "safCache.removeObjectCache -> " +key);
 			// 如果removeFile存在并且是个文件并且可以写，则删除它，并返回删除结果
 			if(removeFile.exists() && removeFile.isFile() && removeFile.canWrite()){
 				return removeFile.delete();
@@ -745,7 +745,7 @@ public class SAFCache {
 	public boolean removeFilesCache(String key){
 		if(hasFilesCache(key)){
 			File removeFile = fileCache.get(key);
-			Log.i(TAG, "cacheManager.removeFilesCache -> " +key);
+			Log.i(TAG, "safCache.removeFilesCache -> " +key);
 			// 如果removeFile存在并且是个文件并且可以写，则删除它，并返回删除结果
 			if(removeFile.exists() && removeFile.isFile() && removeFile.canWrite()){
 				return removeFile.delete();

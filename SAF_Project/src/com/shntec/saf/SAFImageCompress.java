@@ -113,7 +113,7 @@ public class SAFImageCompress {
 		String md5 = SAFUtils.getMD5Str(url);
 		
 		// 如果缓存中存在这张图片，则不下载直接进行读取
-		if(!cache.hasFilesCache(md5)){
+//		if(!cache.hasFilesCache(md5)){
 			// 首先将图片存入本地缓存
 			try {
 				cache.SaveFilesCache(md5, httptransport.download(url, listener));
@@ -122,7 +122,7 @@ public class SAFImageCompress {
 			} catch (IOException e) {
 				throw new SAFException(0, e.getMessage(), e);
 			}
-		}
+//		}
 		
 		
 		
