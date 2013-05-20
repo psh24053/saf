@@ -106,24 +106,71 @@ public class SAFImageViewActivity extends Activity implements OnTouchListener,On
 		// 如果bigImageUrl不为空，则开始从网络上下载
 		if(bigImageUrl != null && bigImageUrl != ""){
 			progress_framelayout.setVisibility(View.VISIBLE);
-			new Thread(new Runnable() {
-				
-				@Override
-				public void run() {
-					// TODO Auto-generated method stub
-					try {
-						loadBigImageUrl();
-					} catch (SAFException e) {
-						e.printStackTrace();
-					}
-					
-				}
-			}).start();
+			new loadBigImageUrl().execute(bigImageUrl);
 		}
 		
-		
-		
 	}
+	/**
+	 * 加载大图片
+	 * @author Panshihao
+	 *
+	 */
+	private class loadBigImageUrl extends SAFRunnerAdapter<String, Integer, Bitmap>{
+
+		@Override
+		public Bitmap doInBackground(String... params) {
+			// TODO Auto-generated method stub
+			SAFImageCompress imageCompress = new SAFImageCompress(new onTransportProgressListener() {
+				
+				@Override
+				public void onProgress(long readSize, long totalSize) {
+					// TODO Auto-generated method stub
+					final int pro = (int) ((float)readSize / totalSize * 100);
+					runOnUiThread(new Runnable() {
+						public void run() {
+							if(pro > progress_bar.getProgress()){
+								progress_bar.setProgress(pro);
+							}
+						}
+					});
+				}
+				
+				@Override
+				public void onComplete() {
+					// TODO Auto-generated method stub
+					System.out.println("onComplete");
+				}
+			});
+			
+			// 从网络上下载图片，然后重新判断newBitmap是否为空并且是否与原bitmap相同
+			Bitmap newBitmap = null;
+			try {
+				newBitmap = imageCompress.HttpFullScreenCompress(params[0]);
+			} catch (SAFException e) {
+				e.printStackTrace();
+			}
+			if(newBitmap != null && newBitmap != bitmap){
+				bitmap.recycle();
+				bitmap = newBitmap;
+			}
+			
+			
+			return bitmap;
+		}
+		@Override
+		public void onPostExecute(Bitmap result) {
+			// TODO Auto-generated method stub
+			super.onPostExecute(result);
+			
+			// 初始化图片信息
+			calculateScale();
+			initImageInfo();
+			// 隐藏进度条
+			progress_framelayout.setVisibility(View.GONE);
+			progress_bar.setVisibility(View.GONE);
+		}
+	}
+	
 	/**
 	 * 初始化按钮事件
 	 */
@@ -144,51 +191,7 @@ public class SAFImageViewActivity extends Activity implements OnTouchListener,On
 		
 		
 	}
-	/**
-	 * 从网络上获取大图，并加载到bitmap中
-	 * @throws SAFException 
-	 */
-	public void loadBigImageUrl() throws SAFException{
-		SAFImageCompress imageCompress = new SAFImageCompress(new onTransportProgressListener() {
-			
-			@Override
-			public void onProgress(long readSize, long totalSize) {
-				// TODO Auto-generated method stub
-				final int pro = (int) ((float)readSize / totalSize * 100);
-				runOnUiThread(new Runnable() {
-					public void run() {
-						if(pro > progress_bar.getProgress()){
-							progress_bar.setProgress(pro);
-						}
-					}
-				});
-			}
-			
-			@Override
-			public void onComplete() {
-				// TODO Auto-generated method stub
-			}
-		});
-		
-		// 从网络上下载图片，然后重新判断newBitmap是否为空并且是否与原bitmap相同
-		Bitmap newBitmap = imageCompress.HttpFullScreenCompress(bigImageUrl);
-		if(newBitmap != null && newBitmap != bitmap){
-			bitmap.recycle();
-			bitmap = newBitmap;
-		}
-		
-		runOnUiThread(new Runnable() {
-			public void run() {
-				// 初始化图片信息
-				calculateScale();
-				initImageInfo();
-				// 隐藏进度条
-				progress_framelayout.setVisibility(View.GONE);
-				progress_bar.setVisibility(View.GONE);
-			}
-		});
-		
-	}
+	
 	
 	/**
 	 * 初始化图片信息

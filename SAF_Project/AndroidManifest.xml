@@ -39,7 +39,6 @@
             </intent-filter>
         </activity>
         <activity android:name=".SAFImageViewActivity"></activity>
-        <activity android:name=".activity.test"></activity>
     </application>
 
 </manifest>

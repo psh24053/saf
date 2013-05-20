@@ -1,10 +1,19 @@
 package com.shntec.saf;
 
+import java.util.concurrent.ThreadPoolExecutor;
+
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
-
+/**
+ * 多线程异步任务类
+ * @author Panshihao
+ *
+ * @param <Params>
+ * @param <Progress>
+ * @param <Result>
+ */
 public abstract class SAFRunnerAdapter<Params, Progress, Result> {
 
 	private Params[] params;
@@ -29,8 +38,7 @@ public abstract class SAFRunnerAdapter<Params, Progress, Result> {
 	public void execute(Params... p){
 		this.params = p;
 		
-		handler.obtainMessage(MSG_ONPRE);
-		
+		handler.obtainMessage(MSG_ONPRE).sendToTarget();
 		
 		SAFRunner.execute(new Runnable() {
 			
@@ -39,15 +47,18 @@ public abstract class SAFRunnerAdapter<Params, Progress, Result> {
 				// TODO Auto-generated method stub
 				result = doInBackground(params);
 				
-				handler.obtainMessage(MSG_ONPOST, result);
+				handler.obtainMessage(MSG_ONPOST, result).sendToTarget();
+				
 				
 			}
 		});
 	};
+	
 	public void publishProgress(Progress... pro){
 		this.progress = pro;
 		
-		handler.obtainMessage(MSG_ONPROGRESS, pro);
+		handler.obtainMessage(MSG_ONPROGRESS, progress).sendToTarget();
+		
 		
 	};
 	
@@ -61,13 +72,12 @@ public abstract class SAFRunnerAdapter<Params, Progress, Result> {
 		public DataHandler(Looper looper){
 			super(looper);
 		}
+		public DataHandler(){}
 		
 		@Override
 		public void handleMessage(Message msg) {
 			// TODO Auto-generated method stub
 			super.handleMessage(msg);
-			
-			System.out.println("handleMessage");
 			
 			switch (msg.what) {
 			case MSG_ONPRE:

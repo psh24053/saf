@@ -35,6 +35,8 @@ import android.widget.ImageView;
 
 public class MainActivity extends Activity {
 
+	private int aa = 0;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -68,12 +70,37 @@ public class MainActivity extends Activity {
 			// TODO Auto-generated method stub
 			super.onProgressUpdate(progress);
 			
-			System.out.println("progress -> "+progress);
+			System.out.println("progress -> "+progress[0]);
 			
 		}
 		@Override
 		public Bitmap doInBackground(String... params) {
 			// TODO Auto-generated method stub
+			
+//			SAFHTTPTransport httptransport = new SAFHTTPTransport();
+//			InputStream in = null;
+//			try {
+//				in = httptransport.download("http://down.ruanmei.com/tweakcube3/tweakcubesetup_3.39.exe", new onTransportProgressListener() {
+//					
+//					@Override
+//					public void onProgress(long readSize, long totalSize) {
+//						// TODO Auto-generated method stub
+//						int pro = (int) ((float) readSize / (float) totalSize * 100);
+//						publishProgress(pro);
+//					}
+//					
+//					@Override
+//					public void onComplete() {
+//						// TODO Auto-generated method stub
+//						System.out.println("onComplete");
+//					}
+//				});
+//			} catch (SAFException e) {
+//				// TODO Auto-generated catch block
+//				e.printStackTrace();
+//			}
+//			
+//			SAFUtils.readInputStreamToString(in);
 			
 			SAFImageCompress ic = new SAFImageCompress(new onTransportProgressListener() {
 				
@@ -111,7 +138,7 @@ public class MainActivity extends Activity {
 				@Override
 				public void onClick(View arg0) {
 					// TODO Auto-generated method stub
-					Intent intent = new Intent(MainActivity.this, test.class);
+					Intent intent = new Intent(MainActivity.this, SAFImageViewActivity.class);
 					intent.putExtra("imageFID", SAFUtils.getMD5Str("http://img6.faloo.com/picture/0x0/0/444/444440.jpg"));
 					intent.putExtra("bigImageUrl", "http://www.sucaitianxia.com/photo/pic/201001/gefnegs48.jpg");
 					startActivity(intent);
@@ -120,6 +147,7 @@ public class MainActivity extends Activity {
 			});
 			Log.i("SAF", result.getWidth()+" ,"+result.getHeight());
 			
+			aa ++;
 		}
 		
 	}

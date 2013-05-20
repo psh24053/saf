@@ -2,6 +2,7 @@ package com.shntec.saf;
 
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadFactory;
 
 import android.content.Context;
 import android.os.Handler;
@@ -31,8 +32,9 @@ public class SAFRunner {
 		safRunner.looper = context.getMainLooper();
 		// 首先获取CPU核心数来计算当前机器的最大线程数
 		int threadSize = SAFUtils.getCPUcores() * 2 + 2 + 2;
-		
+//		System.out.println("threadSize -> "+threadSize);
 		safRunner.executorService = Executors.newFixedThreadPool(threadSize);
+		
 		
 	}
 	/**
@@ -40,7 +42,7 @@ public class SAFRunner {
 	 * @param runnable
 	 */
 	public static void execute(Runnable runnable){
-		safRunner.executorService.execute(runnable);
+		safRunner.executorService.submit(runnable);
 	}
 	/**
 	 * 获取线程池对象
