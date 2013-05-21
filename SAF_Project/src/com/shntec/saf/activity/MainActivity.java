@@ -4,6 +4,8 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import cn.jpush.android.api.InstrumentedActivity;
+
 import com.shntec.saf.R;
 import com.shntec.saf.SAFCache;
 import com.shntec.saf.SAFConfig;
@@ -33,7 +35,7 @@ import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
 
-public class MainActivity extends Activity {
+public class MainActivity extends InstrumentedActivity {
 
 	private int aa = 0;
 	
@@ -50,7 +52,7 @@ public class MainActivity extends Activity {
 		}
 		
 		
-		new abc().execute("");
+//		new abc().execute("");
 
 		
 	}
