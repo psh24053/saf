@@ -14,7 +14,13 @@ public class SAFApplication extends Application {
 	public void onCreate() {
 		// TODO Auto-generated method stub
 		super.onCreate();
-		
+		// 初始化SAF
+		try {
+			SAFLoader.loader(this);
+		} catch (SAFException e) {
+			e.printStackTrace();
+		}
+		// 初始化JPush
 		JPushInterface.init(this);
 		JPushInterface.setDebugMode(true);
 		JPushInterface.setAliasAndTags(this, "SAF_TEST", null);

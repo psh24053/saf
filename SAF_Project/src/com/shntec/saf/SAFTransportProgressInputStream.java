@@ -33,7 +33,6 @@ public class SAFTransportProgressInputStream extends FilterInputStream {
 	
 	@Override
 	public int read() throws IOException {
-
 		int ret = 0;
 		
 		try {
@@ -44,6 +43,7 @@ public class SAFTransportProgressInputStream extends FilterInputStream {
 			}
 			if(readSize > totalSize && !complete){
 				complete = true;
+				listener.onProgress(totalSize, totalSize);
 				listener.onComplete();
 			}
 		}
@@ -56,18 +56,17 @@ public class SAFTransportProgressInputStream extends FilterInputStream {
 	
 	@Override
 	public int read(byte[] b) throws IOException {
-		
 		int ret = 0;
 		
 		try {
 			ret = super.read(b);
-			if (ret != -1 && readSize <= totalSize) {
+			if(ret == -1){
+				complete = true;
+				listener.onProgress(totalSize, totalSize);
+				listener.onComplete();
+			}else{
 				listener.onProgress(readSize, totalSize);
 				readSize += ret;
-			}
-			if(readSize > totalSize && !complete){
-				complete = true;
-				listener.onComplete();
 			}
 		}
 		catch (IOException e){
@@ -79,18 +78,18 @@ public class SAFTransportProgressInputStream extends FilterInputStream {
 
 	@Override
 	public int read(byte[] b, int off, int len) throws IOException {
-		
 		int ret = 0;
 
 		try {
 			ret = super.read(b, off, len);
-			if ( ret != -1 && readSize <= totalSize) {
+			// 如果返回的结果为-1 表示读取结束了
+			if(ret == -1){
+				complete = true;
+				listener.onProgress(totalSize, totalSize);
+				listener.onComplete();
+			}else{
 				listener.onProgress(readSize, totalSize);
 				readSize += ret;
-			}
-			if(readSize > totalSize && !complete){
-				complete = true;
-				listener.onComplete();
 			}
 		}
 		catch (IOException e){

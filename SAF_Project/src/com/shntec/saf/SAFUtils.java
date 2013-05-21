@@ -1,5 +1,7 @@
 package com.shntec.saf;
 
+import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileFilter;
 import java.io.IOException;
@@ -17,6 +19,8 @@ import org.apache.commons.codec.digest.DigestUtils;
 
 
 import android.content.Context;
+import android.content.pm.PackageInfo;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.util.Log;
 
 public class SAFUtils {
@@ -57,20 +61,21 @@ public class SAFUtils {
 	 * @return
 	 */
 	public static byte[] readInputStream(InputStream in){
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
 		
-		String result = "";
 		byte[] readByte = new byte[1024];
 		int readCount = -1;
 		
 		try {
 			while((readCount = in.read(readByte, 0, 1024)) != -1){
-				result += new String(readByte).trim();
+				baos.write(readByte, 0, readCount);
 			}
+			baos.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		return result.getBytes();
+		return baos.toByteArray();
 	}
 	/**
 	 * 将一个inputstream，以字符串的形式返回
@@ -78,19 +83,21 @@ public class SAFUtils {
 	 * @return
 	 */
 	public static String readInputStreamToString(InputStream in){
-		String result = "";
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		
 		byte[] readByte = new byte[1024];
 		int readCount = -1;
 		
 		try {
 			while((readCount = in.read(readByte, 0, 1024)) != -1){
-				result += new String(readByte).trim();
+				baos.write(readByte, 0, readCount);
 			}
+			baos.close();
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
 		
-		return result;
+		return new String(baos.toByteArray());
 	}
 	
 	/**
@@ -237,5 +244,76 @@ public class SAFUtils {
 		return sdf.format(date);
 	}
 	
+	/**
+	 * 获取本地版本号 versionCode
+	 * @param context
+	 * @return
+	 */
+	public static int getLocalVersionCode(Context context){
+		PackageInfo info = null;
+		try {
+			info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+		} catch (NameNotFoundException e) {
+			e.printStackTrace();
+		}
+		return info.versionCode;
+	}
+	/**
+	 * 获取本地版本号名称 versionName
+	 * @param context
+	 * @return
+	 */
+	public static String getLocalVersionName(Context context){
+		PackageInfo info = null;
+		try {
+			info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
+		} catch (NameNotFoundException e) {
+			e.printStackTrace();
+		}
+		return info.versionName;
+	}
 	
+	/** 执行Linux命令，并返回执行结果。 */
+	public static String exec(String[] args) {
+		String result = "";
+		ProcessBuilder processBuilder = new ProcessBuilder(args);
+		Process process = null;
+		InputStream errIs = null;
+		InputStream inIs = null;
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			int read = -1;
+			process = processBuilder.start();
+			errIs = process.getErrorStream();
+			while ((read = errIs.read()) != -1) {
+				baos.write(read);
+			}
+			baos.write('\n');
+			inIs = process.getInputStream();
+			while ((read = inIs.read()) != -1) {
+				baos.write(read);
+			}
+			byte[] data = baos.toByteArray();
+			result = new String(data);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (errIs != null) {
+					errIs.close();
+				}
+				if (inIs != null) {
+					inIs.close();
+				}
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+			if (process != null) {
+				process.destroy();
+			}
+		}
+		return result;
+	}
 }

@@ -4,6 +4,9 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import cn.jpush.android.api.InstrumentedActivity;
 
 import com.shntec.saf.R;
@@ -16,6 +19,7 @@ import com.shntec.saf.SAFImageViewActivity;
 import com.shntec.saf.SAFLoader;
 import com.shntec.saf.SAFRunner;
 import com.shntec.saf.SAFRunnerAdapter;
+import com.shntec.saf.SAFUpdateManager;
 import com.shntec.saf.SAFUtils;
 import com.shntec.saf.onTransportProgressListener;
 import com.shntec.saf.R.id;
@@ -34,22 +38,90 @@ import android.view.Menu;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.ImageView;
+import android.widget.ProgressBar;
 
 public class MainActivity extends InstrumentedActivity {
 
 	private int aa = 0;
-	
+	SAFUpdateManager safupdatemanager = null;
+	ProgressBar bar = null;
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
 		
-		// 加载SAF
-		try {
-			SAFLoader.loader(this);
-		} catch (SAFException e) {
-			e.printStackTrace();
-		}
+		bar = (ProgressBar) findViewById(R.id.progressBar1bb);
+		findViewById(R.id.button).setOnClickListener(new OnClickListener() {
+			
+			@Override
+			public void onClick(View arg0) {
+				// TODO Auto-generated method stub
+				new Thread(new Runnable() {
+					
+					@Override
+					public void run() {
+						// TODO Auto-generated method stub
+						try {
+							safupdatemanager = SAFUpdateManager.getInstance(MainActivity.this);
+							JSONObject newverison = safupdatemanager.checkNewVersion();
+							
+							System.out.println(newverison.toString());
+							if(!newverison.getBoolean("res")){
+								return;
+							}
+							
+							// 如果远程md5与本地md5相同则直接开始安装，否则开始下载
+							if(!safupdatemanager.checkLocalAPK(newverison.getString("md5"))){
+								System.out.println("local not exists!");
+								SAFHTTPTransport httptransport = new SAFHTTPTransport();
+								safupdatemanager.writeLocal(httptransport.download(newverison.getString("apkurl"), new onTransportProgressListener() {
+									
+									private int p = 0;
+									
+									@Override
+									public void onProgress(long readSize, long totalSize) {
+										// TODO Auto-generated method stub
+										int pro = (int) ((float) readSize / (float) totalSize * 100);
+										if(p != pro){
+											p = pro;
+											runOnUiThread(new Runnable() {
+												public void run() {
+													bar.setProgress(p);
+												}
+											});
+											System.out.println(pro);
+										}
+										
+										
+									}
+									
+									@Override
+									public void onComplete() {
+										// TODO Auto-generated method stub
+										System.out.println("onComplete");
+										safupdatemanager.install();
+									}
+								}));
+							}else{
+								System.out.println("local exists!");
+								safupdatemanager.install();
+							}
+							
+							
+							
+							
+						} catch (SAFException e) {
+							e.printStackTrace();
+						} catch (JSONException e) {
+							// TODO Auto-generated catch block
+							e.printStackTrace();
+						}
+					}
+				}).start();
+			}
+		});
+		
+		
 		
 		
 //		new abc().execute("");
