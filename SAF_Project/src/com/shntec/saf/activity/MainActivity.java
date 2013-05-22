@@ -10,6 +10,7 @@ import org.json.JSONObject;
 import cn.jpush.android.api.InstrumentedActivity;
 
 import com.shntec.saf.R;
+import com.shntec.saf.SAFBaseActivity;
 import com.shntec.saf.SAFCache;
 import com.shntec.saf.SAFConfig;
 import com.shntec.saf.SAFException;
@@ -49,7 +50,7 @@ import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
-public class MainActivity extends InstrumentedActivity {
+public class MainActivity extends SAFBaseActivity {
 
 	private int aa = 0;
 	SAFUpdateManager safupdatemanager = null;

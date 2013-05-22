@@ -9,6 +9,8 @@ import java.util.Map;
  * 那么需要重新使用账号密码进行登陆
  * 使用授权令牌登陆后不会获得新的授权令牌，
  * 实现类应该将授权令牌以及账号信息进行持久化存储
+ * 
+ * 无论使用第三方登录还是正常登录，都会返回授权令牌，最后退出时都是使用授权令牌进行退出
  * @author panshihao
  *
  */
@@ -29,6 +31,18 @@ public interface SAFUser {
 	 * @return
 	 */
 	public boolean login(String aut);
+	/**
+	 * 使用QQ进行登录，传入openID
+	 * @param openid
+	 * @return
+	 */
+	public boolean loginFromQQ(String access_token,String openid);
+	/**
+	 * 使用新浪微博进行登录，传入uid
+	 * @param uid
+	 * @return
+	 */
+	public boolean loginFromSinaWeibo(String access_token, String uid);
 	/**
 	 * 登出,登出时使用用户授权令牌进行登出
 	 * @param aut
