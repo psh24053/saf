@@ -37,7 +37,11 @@ public class SAFWebBrowserActivity extends Activity {
 		public boolean shouldOverrideUrlLoading(WebView view, String url);
 		
 	}
-	
+	@Override
+	protected void onDestroy() {
+		// TODO Auto-generated method stub
+		super.onDestroy();
+	}
 	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
@@ -67,6 +71,7 @@ public class SAFWebBrowserActivity extends Activity {
 				view.loadUrl(url);
 				return true;
 			}
+			
 			@Override
 			public void onPageStarted(WebView view, String url, Bitmap favicon) {
 				// TODO Auto-generated method stub
@@ -93,7 +98,6 @@ public class SAFWebBrowserActivity extends Activity {
 			
 		});
 		webView.loadUrl(url);
-		
 		initClick();
 	}
 	/**

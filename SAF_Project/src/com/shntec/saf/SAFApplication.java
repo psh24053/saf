@@ -26,4 +26,6 @@ public class SAFApplication extends Application {
 		JPushInterface.setAliasAndTags(this, "SAF_TEST", null);
 	}
 	
+	
+	
 }
