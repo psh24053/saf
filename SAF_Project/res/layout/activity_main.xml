@@ -36,5 +36,12 @@
         android:layout_alignRight="@+id/button"
         android:layout_below="@+id/button"
         android:layout_marginTop="94dp" />
+    
+    <LinearLayout 
+        android:id="@+id/linearlayout"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:layout_alignParentBottom="true"
+        ></LinearLayout>
 
 </RelativeLayout>

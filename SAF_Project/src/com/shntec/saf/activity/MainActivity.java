@@ -6,6 +6,9 @@ import java.io.InputStream;
 
 import org.json.JSONException;
 import org.json.JSONObject;
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlPullParserFactory;
 
 import cn.jpush.android.api.InstrumentedActivity;
 
@@ -47,6 +50,7 @@ import android.view.View.OnClickListener;
 import android.webkit.WebView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
@@ -94,6 +98,38 @@ public class MainActivity extends SAFBaseActivity {
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+		
+		XmlPullParserFactory factory = null;
+		XmlPullParser pullparser = null;
+		try {
+			factory = XmlPullParserFactory.newInstance();
+			factory.setNamespaceAware(true);
+			pullparser = factory.newPullParser();
+			pullparser.setInput(getAssets().open("abc.xml"), "utf-8");
+			int eventType = pullparser.getEventType();
+			System.out.println(eventType);
+		} catch (XmlPullParserException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}  
+		
+		
+		LinearLayout layout = (LinearLayout) findViewById(R.id.linearlayout);
+		
+		layout.addView(getLayoutInflater().inflate(pullparser, null));
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
 		
 		
 		SAFWebBrowserActivity.webViewListener = new SAFWebBrowserActivity.WebViewListener() {
